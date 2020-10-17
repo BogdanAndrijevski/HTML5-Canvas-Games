@@ -5,12 +5,24 @@ canvas.width = innerWidth
 canvas.height = innerHeight
 
 
+
+// const mouse = {
+//   x: innerWidth / 2,
+//   y: innerHeight / 2
+// }
 let projectiles = [];
 
-addEventListener('click', () => {
-
-  const projectile = new Projectile(canvas.width / 2, canvas.height / 2, 10, 'green', {x:1, y:1})
+addEventListener('click', (event) => {
+  // mouse.x = event.clientX
+  // mouse.y = event.clientY
+  const angle = Math.atan2(event.clientY - canvas.height / 2, event.clientX - canvas.width / 2)
+  const velocity = {
+    x: Math.cos(angle),
+    y: Math.sin(angle)
+  }
+  const projectile = new Projectile(canvas.width / 2, canvas.height / 2, 10, 'green', velocity)
   projectiles.push(projectile)
+  console.log(angle)
 })
 
 // Player
