@@ -1,4 +1,5 @@
 const canvas = document.querySelector('canvas');
+const scoreEl = document.querySelector('#scoreEl');
 const ctx = canvas.getContext('2d');
 // canvas.style.backgroundColor = 'rgb(18, 18, 18)';
 canvas.width = innerWidth
@@ -161,6 +162,7 @@ let projectiles = [];
 let enemies = [];
 
 let animationId;
+let score = 0;
 function animate() {
   animationId = requestAnimationFrame(animate)
   // 'rgb(18, 18, 18)'
@@ -197,9 +199,11 @@ function animate() {
       const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y)
       // enemy / projectile hit
       if (dist - projectile.radius - enemy.radius < 1) {
+
         // create explosions
         for (let i = 0; i < enemy.radius * 1.5; i++) {
-        // for (let i = 0; i < 8; i++) {
+
+          // for (let i = 0; i < 8; i++) {
           particles.push(new Particle(projectile.x, projectile.y, (Math.random() * 2) + 0.5, enemy.color, {
             x: (Math.random() - 0.5) * (Math.random() * 5),
             y: (Math.random() - 0.5) * (Math.random() * 5)
@@ -208,6 +212,9 @@ function animate() {
           }))
         }
         if (enemy.radius - 10 > 5) {
+          // score
+          score += 5;
+          scoreEl.innerHTML = score
           //--------------------------
           // no gsap
           // enemy.radius -= 5 
@@ -220,6 +227,8 @@ function animate() {
             projectiles.splice(projectileIndex, 1)
           }, 0);
         } else {
+          score += 15;
+        scoreEl.innerHTML = score
           setTimeout(() => { // setTimeout: so enemies wont flash when we remove them
             enemies.splice(index, 1)
             projectiles.splice(projectileIndex, 1)
