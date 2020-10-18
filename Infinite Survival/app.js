@@ -122,8 +122,9 @@ const x = canvas.width / 2;
 const y = canvas.height / 2;
 let player = new Player(x, y, 20, 'purple')
 
+let animationId
 function animate() {
-  requestAnimationFrame(animate)
+  animationId = requestAnimationFrame(animate)
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   player.update()
   projectiles.forEach(projectile => {
@@ -131,13 +132,18 @@ function animate() {
   });
   enemies.forEach((enemy, index) => {
     enemy.update();
+    const dist = Math.hypot(player.x - enemy.x, player.y - enemy.y)
+    if (dist - player.radius - enemy.radius < 1) {
+      console.log('end game')
+      cancelAnimationFrame(animationId)
+    }
 
     projectiles.forEach((projectile, projectileIndex) => {
       const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y)
       if (dist - projectile.radius - enemy.radius < 1) {
         setTimeout(() => { // setTimeout: so enemies wont flash when we remove them
           enemies.splice(index, 1)
-          projectiles.splice(projectileIndex, 1)  
+          projectiles.splice(projectileIndex, 1)
         }, 0);
       }
     });
