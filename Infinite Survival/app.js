@@ -5,8 +5,7 @@ canvas.width = innerWidth
 canvas.height = innerHeight
 
 
-let projectiles = [];
-let enemies = [];
+
 
 addEventListener('click', event => {
 
@@ -94,6 +93,39 @@ class Enemy {
   }
 }
 
+// Particles
+class Particle {
+  constructor(x, y, radius, color, velocity) {
+    this.x = x
+    this.y = y
+    this.radius = radius
+    this.color = color
+    this.velocity = velocity
+    this.alpha = 1;
+    this.friction = 0.98
+  }
+
+  draw() {
+    ctx.save()
+    ctx.globalAlpha = this.alpha
+    ctx.beginPath()
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+    ctx.fillStyle = this.color
+    ctx.fill()
+    ctx.closePath()
+    ctx.restore()
+  }
+
+  update() {
+    this.draw()
+    this.velocity.x *= this.friction
+    this.velocity.y *= this.friction
+    this.x = this.x + this.velocity.x
+    this.y = this.y + this.velocity.y
+    this.alpha -= 0.01
+  }
+}
+
 function spawnEnemies() {
   setInterval(() => {
     const radius = Math.random() * (30 - 4) + 4 // from 4 to 30
@@ -124,6 +156,9 @@ function spawnEnemies() {
 const x = canvas.width / 2;
 const y = canvas.height / 2;
 let player = new Player(x, y, 10, 'white')
+let particles = []
+let projectiles = [];
+let enemies = [];
 
 let animationId;
 function animate() {
@@ -133,6 +168,13 @@ function animate() {
   ctx.fillRect(0, 0, canvas.width, canvas.height)
   // ctx.clearRect(0, 0, canvas.width, canvas.height)
   player.update()
+  particles.forEach((particle, index) => {
+    if (particle.alpha <= 0) {
+      particles.splice(index, 1)
+    } else {
+      particle.update()
+    }
+  });
   projectiles.forEach((projectile, index) => {
     projectile.update();
     if (projectile.x + projectile.radius < 0 ||
@@ -155,13 +197,23 @@ function animate() {
       const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y)
       // enemy / projectile hit
       if (dist - projectile.radius - enemy.radius < 1) {
+        // create explosions
+        for (let i = 0; i < enemy.radius * 1.5; i++) {
+        // for (let i = 0; i < 8; i++) {
+          particles.push(new Particle(projectile.x, projectile.y, (Math.random() * 2) + 0.5, enemy.color, {
+            x: (Math.random() - 0.5) * (Math.random() * 5),
+            y: (Math.random() - 0.5) * (Math.random() * 5)
+            // x: Math.random() - 0.5,
+            // y: Math.random() - 0.5
+          }))
+        }
         if (enemy.radius - 10 > 5) {
           //--------------------------
           // no gsap
           // enemy.radius -= 5 
           //--------------------------
           // using GSAP
-          gsap.to(enemy,{
+          gsap.to(enemy, {
             radius: enemy.radius - 10
           })
           setTimeout(() => { // setTimeout: so enemies wont flash when we remove them
