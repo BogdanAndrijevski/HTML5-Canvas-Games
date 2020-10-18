@@ -1,6 +1,6 @@
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
-canvas.style.backgroundColor = 'rgb(18, 18, 18)';
+// canvas.style.backgroundColor = 'rgb(18, 18, 18)';
 canvas.width = innerWidth
 canvas.height = innerHeight
 
@@ -12,10 +12,12 @@ addEventListener('click', event => {
 
   const angle = Math.atan2(event.clientY - canvas.height / 2, event.clientX - canvas.width / 2)
   const velocity = {
-    x: Math.cos(angle),
-    y: Math.sin(angle)
+    // x: Math.cos(angle),
+    // y: Math.sin(angle)
+    x: Math.cos(angle) * 4, // more speed
+    y: Math.sin(angle) * 4 // more speed
   }
-  const projectile = new Projectile(canvas.width / 2, canvas.height / 2, 10, 'green', velocity)
+  const projectile = new Projectile(canvas.width / 2, canvas.height / 2, 5, 'white', velocity)
   projectiles.push(projectile)
   // console.log(angle)
 })
@@ -107,7 +109,8 @@ function spawnEnemies() {
     }
 
 
-    const color = 'yellow'
+    // const color = 'yellow'
+    const color = `hsl(${Math.random() * 360},50%, 50%)`
     const angle = Math.atan2(canvas.height / 2 - y, canvas.width / 2 - x)
     const velocity = {
       x: Math.cos(angle),
@@ -115,18 +118,20 @@ function spawnEnemies() {
     }
 
     enemies.push(new Enemy(x, y, radius, color, velocity))
-  }, 100000)
+  }, 1000)
 }
 
 const x = canvas.width / 2;
 const y = canvas.height / 2;
-let player = new Player(x, y, 20, 'purple')
+let player = new Player(x, y, 10, 'white')
 
-let animationId
+let animationId;
 function animate() {
-  console.log(projectiles.length)
   animationId = requestAnimationFrame(animate)
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  // 'rgb(18, 18, 18)'
+  ctx.fillStyle = 'rgba(0,0,0,0.2)'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  // ctx.clearRect(0, 0, canvas.width, canvas.height)
   player.update()
   projectiles.forEach((projectile, index) => {
     projectile.update();
