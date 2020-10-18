@@ -17,7 +17,7 @@ addEventListener('click', event => {
   }
   const projectile = new Projectile(canvas.width / 2, canvas.height / 2, 10, 'green', velocity)
   projectiles.push(projectile)
-  console.log(angle)
+  // console.log(angle)
 })
 
 // Player
@@ -115,7 +115,7 @@ function spawnEnemies() {
     }
 
     enemies.push(new Enemy(x, y, radius, color, velocity))
-  }, 1000)
+  }, 100000)
 }
 
 const x = canvas.width / 2;
@@ -124,11 +124,19 @@ let player = new Player(x, y, 20, 'purple')
 
 let animationId
 function animate() {
+  console.log(projectiles.length)
   animationId = requestAnimationFrame(animate)
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   player.update()
-  projectiles.forEach(projectile => {
+  projectiles.forEach((projectile, index) => {
     projectile.update();
+    if (projectile.x + projectile.radius < 0 ||
+      projectile.x - projectile.radius > canvas.width ||
+      projectile.y + projectile.radius < 0 ||
+      projectile.y - projectile.radius > canvas.height) {
+      projectiles.splice(index, 1)
+
+    }
   });
   enemies.forEach((enemy, index) => {
     enemy.update();
