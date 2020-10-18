@@ -153,11 +153,26 @@ function animate() {
 
     projectiles.forEach((projectile, projectileIndex) => {
       const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y)
+      // enemy / projectile hit
       if (dist - projectile.radius - enemy.radius < 1) {
-        setTimeout(() => { // setTimeout: so enemies wont flash when we remove them
-          enemies.splice(index, 1)
-          projectiles.splice(projectileIndex, 1)
-        }, 0);
+        if (enemy.radius - 10 > 5) {
+          //--------------------------
+          // no gsap
+          // enemy.radius -= 5 
+          //--------------------------
+          // using GSAP
+          gsap.to(enemy,{
+            radius: enemy.radius - 10
+          })
+          setTimeout(() => { // setTimeout: so enemies wont flash when we remove them
+            projectiles.splice(projectileIndex, 1)
+          }, 0);
+        } else {
+          setTimeout(() => { // setTimeout: so enemies wont flash when we remove them
+            enemies.splice(index, 1)
+            projectiles.splice(projectileIndex, 1)
+          }, 0);
+        }
       }
     });
 
