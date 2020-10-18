@@ -1,5 +1,9 @@
 const canvas = document.querySelector('canvas');
 const scoreEl = document.querySelector('#scoreEl');
+const startGameBtn = document.querySelector('#startGameBtn');
+const startGameDiv = document.querySelector('#startGameDiv');
+const bigScore = document.querySelector('#bigScore');
+
 const ctx = canvas.getContext('2d');
 // canvas.style.backgroundColor = 'rgb(18, 18, 18)';
 canvas.width = innerWidth
@@ -7,6 +11,13 @@ canvas.height = innerHeight
 
 
 
+
+startGameBtn.addEventListener('click', () => {
+  startGameDiv.style.display = 'none';
+  init()
+  animate()
+  spawnEnemies()
+})
 
 addEventListener('click', event => {
 
@@ -161,6 +172,14 @@ let particles = []
 let projectiles = [];
 let enemies = [];
 
+function init() {
+  score = 0;
+  scoreEl.innerHTML = score;
+  player = new Player(x, y, 10, 'white')
+  particles = []
+  projectiles = [];
+  enemies = [];
+}
 let animationId;
 let score = 0;
 function animate() {
@@ -192,6 +211,8 @@ function animate() {
     const dist = Math.hypot(player.x - enemy.x, player.y - enemy.y)
     if (dist - player.radius - enemy.radius < 1) {
       console.log('end game')
+      startGameDiv.style.display = 'flex';
+      bigScore.innerHTML = score;
       cancelAnimationFrame(animationId)
     }
 
@@ -228,7 +249,7 @@ function animate() {
           }, 0);
         } else {
           score += 15;
-        scoreEl.innerHTML = score
+          scoreEl.innerHTML = score
           setTimeout(() => { // setTimeout: so enemies wont flash when we remove them
             enemies.splice(index, 1)
             projectiles.splice(projectileIndex, 1)
@@ -240,5 +261,3 @@ function animate() {
   });
 }
 
-animate()
-spawnEnemies()
