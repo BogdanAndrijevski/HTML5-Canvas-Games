@@ -38,7 +38,7 @@ let hasGameEnded = false;
 
 let trafficCars = [];
 let playerCar;
-
+let lines = [];
 
 //===========================================
 // keyboard movement
@@ -152,11 +152,43 @@ class TrafficCar {
   }
 }
 
+class Line {
+  constructor(x, y, width, height, velocity_y, color) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.color = color;
+    this.velocity = {
+      y: velocity_y
+    }
+  }
+
+  draw() {
+    ctx.fillStyle = this.color;
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+  }
+  update() {
+    this.velocity.y += velocityForLinesAndCars;
+    this.y += this.velocity.y
+    if (this.y > canvas.height) {
+      this.y = -this.height;
+    }
+    this.draw()
+  }
+}
+
 init();
 animate();
 
 function init() {
   playerCar = new PlayerCar(playerCarImg, canvas.width / 2 - car.width / 2, canvas.height - car.height, car.width, car.height)
+
+  // Lines
+  for (let i = 0; i < 3; i++) {
+    lines.push(new Line(canvas.width / 3, i * 210, 8, 100, 6, '#9c9c9c'))
+    lines.push(new Line(canvas.width / 3 * 2, i * 210, 8, 100, 6, '#9c9c9c'))
+  }
 
   // Traffic Cars
   for (let i = 0; i < 10; i++) {
@@ -181,13 +213,17 @@ function animate() {
   requestAnimationFrame(animate);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // lines
+  lines.forEach(line => {
+    line.update();
+  });
+
   trafficCars.forEach(trafficCar => {
+    // collision detection
     if (playerCar.x < trafficCar.x + trafficCar.width && playerCar.x + playerCar.width > trafficCar.x &&
       playerCar.y < trafficCar.y + trafficCar.height && playerCar.y + playerCar.height > trafficCar.y) {
-      console.log('collision')
-        // hasGameEnded = true;
+      hasGameEnded = true;
     }
-    trafficCar.update();
     trafficCar.update();
   });
 
