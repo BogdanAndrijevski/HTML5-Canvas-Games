@@ -44,6 +44,25 @@ let lines = [];
 let score = 0;
 let scoreCounter = 0;
 
+// restart the game
+document.addEventListener('click', () => {
+  if (hasGameEnded) {
+    hasGameEnded = false;
+    lines = [];
+    trafficCars = [];
+    score = 0;
+    init()
+    requestAnimationFrame(animate);
+  }
+});
+
+// load font
+const pizzaFont = new FontFace('pizzaFont', 'url(Fonts/pizzabot.ttf)');
+pizzaFont.load().then(loadedFont => {
+    document.fonts.add(loadedFont)
+}).catch((error) => {
+    console.log('Failed to load font: ' + error)
+})
 //===========================================
 // keyboard movement
 
@@ -219,8 +238,8 @@ function animate() {
   //----------------------------------------------------------------
   if (hasGameEnded) {
     ctx.fillStyle = "cyan";
-    ctx.font = "20px Consolas";
-    ctx.fillText("Click To Start...", 350, 200);
+    ctx.font = "30px pizzaFont";
+    ctx.fillText("Click To Start...", 310, 240);
     cancelAnimationFrame(req);
     return;
   }
@@ -251,7 +270,7 @@ function animate() {
   }
 
   let array = ["Score: ", score];
-  ctx.font = "30px myThirdFont";
+  ctx.font = "30px pizzaFont";
   writeText(array, 10, 30);
 
 }
@@ -272,15 +291,3 @@ function writeText(str, x, y) {
   }
 }
 
-document.addEventListener('click', () => {
-  if (hasGameEnded) {
-    hasGameEnded = false;
-    lines = [];
-    trafficCars = [];
-    score = 0;
-    init()
-    requestAnimationFrame(animate);
-
-  }
-
-});
