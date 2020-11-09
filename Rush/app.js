@@ -40,6 +40,10 @@ let trafficCars = [];
 let playerCar;
 let lines = [];
 
+
+let score = 0;
+let scoreCounter = 0;
+
 //===========================================
 // keyboard movement
 
@@ -178,8 +182,7 @@ class Line {
   }
 }
 
-init();
-animate();
+
 
 function init() {
   playerCar = new PlayerCar(playerCarImg, canvas.width / 2 - car.width / 2, canvas.height - car.height, car.width, car.height)
@@ -211,7 +214,7 @@ function init() {
 
 let req;
 function animate() {
-  requestAnimationFrame(animate);
+  req = requestAnimationFrame(animate);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   //----------------------------------------------------------------
   if (hasGameEnded) {
@@ -219,7 +222,7 @@ function animate() {
     ctx.font = "20px Consolas";
     ctx.fillText("Click To Start...", 350, 200);
     cancelAnimationFrame(req);
-    return; // za da go dade ekranot koa ke zavrsi igrata za da kliknes
+    return;
   }
   //----------------------------------------------------------------
   // backgorund
@@ -241,4 +244,43 @@ function animate() {
 
   playerCar.update();
 
+  scoreCounter++;
+
+  if (scoreCounter % 30 == 0) {
+    score = score + 1;
+  }
+
+  let array = ["Score: ", score];
+  ctx.font = "30px myThirdFont";
+  writeText(array, 10, 30);
+
 }
+
+
+init();
+animate();
+
+function writeText(str, x, y) {
+  for (let i = 0; i < str.length; ++i) {
+    let ch = str[i];
+    ctx.fillStyle = "salmon";
+    if (isNaN(ch)) {
+      ctx.fillStyle = "wheat";
+    }
+    ctx.fillText(ch, x, y);
+    x += ctx.measureText(ch).width;
+  }
+}
+
+document.addEventListener('click', () => {
+  if (hasGameEnded) {
+    hasGameEnded = false;
+    lines = [];
+    trafficCars = [];
+    score = 0;
+    init()
+    requestAnimationFrame(animate);
+
+  }
+
+});
