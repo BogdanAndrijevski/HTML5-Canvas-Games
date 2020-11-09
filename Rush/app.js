@@ -25,15 +25,16 @@ let car = {
   height: 70,
   speed: 5,
   movement: {
-    left : false,
-    right : false,
+    left: false,
+    right: false,
 
-    up : false,
-    down : false,
+    up: false,
+    down: false,
   }
 }
 
 let velocityForLinesAndCars = 0.001;
+let hasGameEnded = false;
 
 let trafficCars = [];
 let playerCar;
@@ -112,42 +113,42 @@ class PlayerCar {
 
 class TrafficCar {
   constructor(image, x, y, width, height) {
-      this.image = image
-      this.x = x;
-      this.y = y;
-      this.width = width;
-      this.height = height;
-      this.velocity = {
-          y: 2
-      }
+    this.image = image
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.velocity = {
+      y: 2
+    }
   }
 
   draw() {
-      ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
   }
   update() {
-      this.velocity.y += velocityForLinesAndCars;
-      this.y += this.velocity.y;
+    this.velocity.y += velocityForLinesAndCars;
+    this.y += this.velocity.y;
 
 
-      // so othey wont spawn on top of eachother
-      if (this.y > canvas.height) {
-          let x = (Math.random() * (canvas.width - car.width));
-          let y = (Math.random() * 600) - 700;
-          for (let i = 0; i < trafficCars.length; i++) {
-              const trafficCar = trafficCars[i];
-              if (x < trafficCar.x + trafficCar.width && x + car.width > trafficCar.x
-                  && y < trafficCar.y + trafficCar.height && y + car.height > trafficCar.y) {
+    // so othey wont spawn on top of eachother
+    if (this.y > canvas.height) {
+      let x = (Math.random() * (canvas.width - car.width));
+      let y = (Math.random() * 600) - 700;
+      for (let i = 0; i < trafficCars.length; i++) {
+        const trafficCar = trafficCars[i];
+        if (x < trafficCar.x + trafficCar.width && x + car.width > trafficCar.x
+          && y < trafficCar.y + trafficCar.height && y + car.height > trafficCar.y) {
 
-                  x = (Math.random() * (canvas.width - car.width));
-                  y = (Math.random() * 600) - 700;
-                  i = -1;
-              }
-          }
-          this.x = x;
-          this.y = y;
+          x = (Math.random() * (canvas.width - car.width));
+          y = (Math.random() * 600) - 700;
+          i = -1;
+        }
       }
-      this.draw()
+      this.x = x;
+      this.y = y;
+    }
+    this.draw()
   }
 }
 
@@ -157,23 +158,23 @@ animate();
 function init() {
   playerCar = new PlayerCar(playerCarImg, canvas.width / 2 - car.width / 2, canvas.height - car.height, car.width, car.height)
 
- // Traffic Cars
- for (let i = 0; i < 10; i++) {
-  let x = (Math.random() * (canvas.width - car.width));
-  let y = (Math.random() * (600)) - 700;
+  // Traffic Cars
+  for (let i = 0; i < 10; i++) {
+    let x = (Math.random() * (canvas.width - car.width));
+    let y = (Math.random() * (600)) - 700;
 
-  for (let j = 0; j < trafficCars.length; j++) {
+    for (let j = 0; j < trafficCars.length; j++) {
       if (x < trafficCars[j].x + trafficCars[j].width && x + car.width > trafficCars[j].x
-          && y < trafficCars[j].y + trafficCars[j].height && y + car.height > trafficCars[j].y) {
-          x = (Math.random() * (canvas.width - car.width));
-          y = (Math.random() * (600)) - 700;
-          j = -1;
+        && y < trafficCars[j].y + trafficCars[j].height && y + car.height > trafficCars[j].y) {
+        x = (Math.random() * (canvas.width - car.width));
+        y = (Math.random() * (600)) - 700;
+        j = -1;
       }
 
-  }
-  trafficCars.push(new TrafficCar(trafficCarImg, x, y, car.width, car.height))
+    }
+    trafficCars.push(new TrafficCar(trafficCarImg, x, y, car.width, car.height))
 
-}
+  }
 }
 
 function animate() {
@@ -181,8 +182,14 @@ function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   trafficCars.forEach(trafficCar => {
+    if (playerCar.x < trafficCar.x + trafficCar.width && playerCar.x + playerCar.width > trafficCar.x &&
+      playerCar.y < trafficCar.y + trafficCar.height && playerCar.y + playerCar.height > trafficCar.y) {
+      console.log('collision')
+        // hasGameEnded = true;
+    }
     trafficCar.update();
-});
+    trafficCar.update();
+  });
 
   playerCar.update();
 
