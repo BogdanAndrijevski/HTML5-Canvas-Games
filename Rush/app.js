@@ -209,10 +209,22 @@ function init() {
   }
 }
 
+let req;
 function animate() {
   requestAnimationFrame(animate);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+  //----------------------------------------------------------------
+  if (hasGameEnded) {
+    ctx.fillStyle = "cyan";
+    ctx.font = "20px Consolas";
+    ctx.fillText("Click To Start...", 350, 200);
+    cancelAnimationFrame(req);
+    return; // za da go dade ekranot koa ke zavrsi igrata za da kliknes
+  }
+  //----------------------------------------------------------------
+  // backgorund
+  ctx.fillStyle = '#080808';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   // lines
   lines.forEach(line => {
     line.update();
