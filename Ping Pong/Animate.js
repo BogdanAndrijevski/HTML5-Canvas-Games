@@ -2,6 +2,11 @@ function init() {
     player = new PlayerPaddle(sizes.paddle.padding, canvas.height / 2 - sizes.paddle.height / 2, sizes.paddle.width, sizes.paddle.height, 'red')
     computer = new ComputerPaddle(canvas.width - (sizes.paddle.padding + sizes.paddle.width), canvas.height / 2 - sizes.paddle.height / 2, sizes.paddle.width, sizes.paddle.height, 'cyan')
     ball = new Ball(450, 200, 5, 2, sizes.ball.radius, 'salmon');
+
+     // drawing the net
+     for (let i = 0; i < canvas.height; i += 40) {
+        netLines.push(new NetLine(canvas.width / 2 - 1, i, 2, 20, 'orange'))
+    }
 }
 
 let req;
@@ -18,6 +23,10 @@ function animate() {
         cancelAnimationFrame(req);
         return;
     }
+    
+    netLines.forEach(netLine => {
+        netLine.draw();
+    });
     ball.update();
     player.update(ball)
     computer.update(ball)
