@@ -23,6 +23,13 @@ const matrix = [
   [0, 1, 0],
 ];
 
+function createMatrix(w, h) {
+  const matrix = [];
+  while(h--){
+    matrix.push(new Array(w).fill(0))
+  }
+  return matrix;
+}
 
 function drawMatrix(matrix, offset) {
   matrix.forEach((row, y) => {
@@ -35,10 +42,14 @@ function drawMatrix(matrix, offset) {
   });
 }
 
+const arena = createMatrix(12, 20);
+
 const player = {
   pos: { x: 5, y: 5 },
   matrix: matrix
 }
+let [a, b] = [player.matrix, player.pos];
+
 
 function playerDrop() {
   player.pos.y++;
@@ -55,24 +66,22 @@ let dropInterval = 1000;
 let lastTime = 0;
 let req;
 function animate(time = 0) {
-  const deltaTime = time - lastTime;
-  lastTime = time;
-
   req = requestAnimationFrame(animate);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  const deltaTime = time - lastTime;
+  lastTime = time;
+
   dropCounter += deltaTime;
   if (dropCounter > dropInterval) {
-    playerDrop()
+    // playerDrop()
   }
+
 
   draw();
 }
 
 animate();
-
-
-
 
 
 document.addEventListener('keydown', e => {
