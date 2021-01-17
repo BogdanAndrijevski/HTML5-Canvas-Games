@@ -1,6 +1,6 @@
 const canvas = document.querySelector('canvas');
-canvas.width = 240;
-canvas.height = 400;
+canvas.width = 240; // 12
+canvas.height = 400; // 20
 const ctx = canvas.getContext('2d');
 
 canvas.style.display = "block";
@@ -25,7 +25,7 @@ const matrix = [
 
 function createMatrix(w, h) {
   const matrix = [];
-  while(h--){
+  while (h--) {
     matrix.push(new Array(w).fill(0))
   }
   return matrix;
@@ -45,18 +45,47 @@ function drawMatrix(matrix, offset) {
 const arena = createMatrix(12, 20);
 
 const player = {
-  pos: { x: 5, y: 5 },
+  pos: { x: 1, y: 1 },
   matrix: matrix
 }
 let [a, b] = [player.matrix, player.pos];
 
+function merge(arena, player) {
+  player.matrix.forEach((row, y) => {
+    row.forEach((value, x) => {
+      if (value !== 0) {
+        arena[y + player.pos.y][x + player.pos.x] = value;
+      }
+    });
+  });
+}
+
+function collide(arena, player) {
+  const [m, o] = [player.matrix, player.pos];
+  for (let y = 0; y < m.length; y++) {
+    for (let x = 0; x < m[y].length; x++) {
+      if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 
 function playerDrop() {
   player.pos.y++;
+  if (collide(arena, player)) {
+    player.pos.y--;
+    merge(arena, player);
+    player.pos.y = 0;
+  }
   dropCounter = 0;
 }
 
 function draw() {
+
+  drawMatrix(arena, { x: 0, y: 0 });
   drawMatrix(player.matrix, player.pos);
 }
 
@@ -83,14 +112,19 @@ function animate(time = 0) {
 
 animate();
 
+function playerMove(dir) {
+  player.pos.x += dir;
+  if(collide(arena, player)){
+    player.pos.x -= dir;
+  }
 
+}
 document.addEventListener('keydown', e => {
   if (e.key === 'a') {
-    player.pos.x--;
+    playerMove(-1);
   } else if (e.key === 'd') {
-    player.pos.x++;
+    playerMove(1);
   } else if (e.key === 's') {
     playerDrop()
   }
 });
-
