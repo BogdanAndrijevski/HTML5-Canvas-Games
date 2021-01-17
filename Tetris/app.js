@@ -16,6 +16,9 @@ canvas.style.border = "2px solid red";
 ctx.fillStyle = 'black'
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 ctx.scale(20, 20);
+// ctx.scale(10, 10);
+
+let score = 0;
 
 const matrix = [
   [0, 0, 0],
@@ -57,11 +60,17 @@ function drawMatrix(matrix, offset) {
 const arena = createMatrix(12, 20);
 
 const player = {
-  pos: { x: 1, y: 1 },
-  matrix: createPiece('O')
-  // matrix: createPiece('T')
-  // matrix: matrix
+  pos: { x: 0, y: 0 },
+  matrix: null,
+  score: 0
 }
+
+// const player = {
+//   pos: { x: 1, y: 1 },
+//   matrix: createPiece('O'),
+//   score: 0
+// }
+
 let [a, b] = [player.matrix, player.pos];
 
 function merge(arena, player) {
@@ -170,16 +179,34 @@ function playerDrop() {
   if (collide(arena, player)) {
     player.pos.y--;
     merge(arena, player);
-    playerReset()
-    // player.pos.y = 0;
+    playerReset();
+    arenaSweep();
   }
   dropCounter = 0;
 }
 
 function draw() {
-
   drawMatrix(arena, { x: 0, y: 0 });
   drawMatrix(player.matrix, player.pos);
+}
+
+
+
+function arenaSweep() {
+  let rowCount = 1;
+  outer: for (let y = arena.length - 1; y > 0; --y) {
+    for (let x = 0; x < arena[y].length; ++x) {
+      if (arena[y][x] === 0) {
+        continue outer;
+      }
+    }
+    const row = arena.splice(y, 1)[0].fill(0);
+    arena.unshift(row);
+    ++y;
+
+    player.score += rowCount * 10;
+    rowCount *= 2;
+  }
 }
 
 function playerReset() {
@@ -192,6 +219,8 @@ function playerReset() {
     arena.forEach(row => {
       row.fill(0);
     });
+    player.score = 0;
+   
   }
 }
 
@@ -199,6 +228,7 @@ let dropCounter = 0;
 let dropInterval = 1000;
 let lastTime = 0;
 let req;
+
 function animate(time = 0) {
   req = requestAnimationFrame(animate);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -208,12 +238,16 @@ function animate(time = 0) {
 
   dropCounter += deltaTime;
   if (dropCounter > dropInterval) {
-    playerDrop()
+    playerDrop();
   }
 
-
   draw();
+  ctx.fillStyle = "#01e8a2";
+  ctx.font = "italic small-caps bold 0.5px Arial Black";
+  ctx.fillText(`Player score: ${player.score}`, 0.5, 0.8);
 }
+
+playerReset();
 
 animate();
 
