@@ -27,10 +27,6 @@ class Arena {
     this.matrix = matrix
   }
 
-  clear() {
-    this.matrix.forEach(row => row.fill(0));
-  }
-
   collide(player) {
     const [m, o] = [player.matrix, player.pos];
     for (let y = 0; y < m.length; y++) {
@@ -69,21 +65,19 @@ class Arena {
       rowCount *= 2;
     }
   }
-
 }
-
-
 
 class Player {
   constructor() {
-
+    this.pieces = 'ILJOTSZ';
     this.dropCounter = 0;
     this.dropInterval = 1000;
-
-
-
-    this.pos = { x: 0, y: 0 };
-    this.matrix = null;
+    this.matrix = createPiece(this.pieces[this.pieces.length * Math.random() | 0]);
+    this.pos =
+    {
+      x: (arena.matrix[0].length / 2 | 0) - (this.matrix[0].length / 2 | 0),
+      y: 0
+    };
     this.score = 0;
   }
   move(dir) {
@@ -125,15 +119,13 @@ class Player {
 
 
   reset() {
-    const pieces = 'ILJOTSZ';
-    this.matrix = createPiece(pieces[pieces.length * Math.random() | 0]);
+   
+    this.matrix = createPiece(this.pieces[this.pieces.length * Math.random() | 0]);
     this.pos.y = 0;
     this.pos.x = (arena.matrix[0].length / 2 | 0) - (this.matrix[0].length / 2 | 0);
 
     if (arena.collide(this)) {
-      arena.clear()
-      this.score = 0;
-
+      hasGameEnded = true;
     }
   }
   rotate(dir) {
@@ -159,10 +151,6 @@ class Player {
   }
 }
 
-
-
-
-
 let colors = [
   null,
   '#FF0D72',
@@ -184,17 +172,14 @@ function drawMatrix(matrix, offset) {
   });
 }
 
-const arena = new Arena(12, 20);
-const player = new Player;
 
-
-
-
-
-let [a, b] = [player.matrix, player.pos];
-
-
-
+let arena;
+let player;
+let hasGameEnded = false;
+function init() {
+  arena = new Arena(12, 20);
+  player = new Player;
+}
 
 
 function createPiece(type) {
@@ -257,7 +242,20 @@ let req;
 function animate(time = 0) {
   req = requestAnimationFrame(animate);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //----------------------------------------------------------------
+  if (hasGameEnded) {
+    let text = 'Click To Start...'
 
+    ctx.fillStyle = "cyan";
+    ctx.font = "italic small-caps bold 1px Arial Black";
+    let textWidth = ctx.measureText(text).width;
+    let textHeight = ctx.measureText('M').width; // close approximation 
+
+    ctx.fillText(`${text}`, ((canvas.width / 20) / 2) - (textWidth / 2), ((canvas.height / 20) / 2) - (textHeight / 2));
+    cancelAnimationFrame(req);
+    return;
+  }
+  //----------------------------------------------------------------
   const deltaTime = time - lastTime;
   lastTime = time;
   player.update(deltaTime)
@@ -268,21 +266,31 @@ function animate(time = 0) {
   ctx.fillText(`Player score: ${player.score}`, 0.5, 0.8);
 }
 
-player.reset();
-
+init();
 animate();
 
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'a') {
-    player.move(-1);
-  } else if (e.key === 'd') {
-    player.move(1);
-  } else if (e.key === 's') {
-    player.drop()
-  } else if (e.key === 'q') {
-    player.rotate(-1);
-  } else if (e.key === 'w') {
-    player.rotate(1);
+  if (hasGameEnded === false) {
+    if (e.key === 'a') {
+      player.move(-1);
+    } else if (e.key === 'd') {
+      player.move(1);
+    } else if (e.key === 's') {
+      player.drop()
+    } else if (e.key === 'q') {
+      player.rotate(-1);
+    } else if (e.key === 'w') {
+      player.rotate(1);
+    }
+  }
+});
+
+// restart the game
+document.addEventListener('click', () => {
+  if (hasGameEnded) {
+    hasGameEnded = false;
+    init()
+    requestAnimationFrame(animate);
   }
 });
