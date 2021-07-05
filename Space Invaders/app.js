@@ -14,8 +14,11 @@ canvas.style.right = 0;
 canvas.style.border = "2px solid red";
 
 let bottomBorderPadding = 25;
+let bottomBorderHeight = canvas.height - bottomBorderPadding;
 let enemiesLength;
 
+let player;
+let playerScore = 0;
 
 let plane = {
   height: 50,
@@ -31,6 +34,9 @@ let readyToFire = false
 let weaponsLocked = false;
 
 let projectiles;
+let explosionParticles;
+let enemyProjectiles;
+
 
 function keysPressed(e) {
   if (e.keyCode === 87) {
@@ -204,9 +210,41 @@ class Projectile {
   }
 }
 
+class ExplosionParticle {
+  constructor(x, y, width, color, velocity) {
+    this.x = x
+    this.y = y
+    this.width = width
+    this.height = width
+    this.color = color
+    this.velocity = velocity
+    this.alpha = 1;
+    this.friction = 0.98
+  }
+
+  draw() {
+    ctx.save()
+    ctx.globalAlpha = this.alpha
+    ctx.fillStyle = this.color;
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+    ctx.restore()
+  }
+
+  update() {
+    this.draw()
+    this.velocity.x *= this.friction
+    this.velocity.y *= this.friction
+    this.x = this.x + this.velocity.x
+    this.y = this.y + this.velocity.y
+    this.alpha -= 0.01
+  }
+}
+
+
 function init() {
   enemies = [];
-
+  explosionParticles = []
+  enemyProjectiles = [];
   projectiles = [];
 
   player = new Player(canvas.width / 2 - plane.width / 2, canvas.height - plane.height - bottomBorderPadding, plane.width, plane.height)
@@ -251,10 +289,18 @@ class Enemy {
     }
   }
 
+  shootProjectile() {
+    if (Math.random() < 1 / (enemiesLength * 60)) {
+      let projectileHeight = 15;
+      let projectileWidth = 4;
+      enemyProjectiles.push(new Projectile(this.x + this.width / 2 - projectileWidth / 2, this.y + this.height, projectileWidth, projectileHeight, 6, this.color));
+    }
+  }
+
   update(haveTwoSecondsPassed) {
     this.danceAndMove(haveTwoSecondsPassed)
     this.draw(haveTwoSecondsPassed)
-
+    this.shootProjectile()
   }
 }
 
@@ -564,12 +610,71 @@ function animate() {
   //  PLAYER
   //-------------------------------
   player.update();
+
   //-------------------------------
   //  PLAYER PROJECTILES
   //-------------------------------
-  projectiles.forEach(projectile => {
+  for (let i = projectiles.length - 1; i >= 0; i--) {
+    const projectile = projectiles[i];
+    //------------------------------
     projectile.update();
+    //------------------------------
+    if (projectile.y + projectile.height < 0) {
+      projectiles.splice(i, 1);
+      continue;
+    }
 
+    for (let j = enemies.length - 1; j >= 0; j--) {
+      const enemy = enemies[j];
+      // collision 
+      if (projectile.x < enemy.x + enemy.width && projectile.x + projectile.width > enemy.x &&
+        projectile.y < enemy.y + enemy.height && projectile.y + projectile.height > enemy.y) {
+        projectiles.splice(i, 1)
+        enemies.splice(j, 1)
+        enemiesLength = enemies.length
+        if (enemiesLength === 0) hasGameEnded = true;
+        playerScore += enemy.constructor.name == 'Octopus' ? 10 : enemy.constructor.name == 'Enemy' ? 20 : 30;
+
+        //-------------------------------
+        // create explosions
+        for (let i = 0; i < 8; i++) {
+          let width = (Math.random() * 2) + 3.5;
+          explosionParticles.push(new ExplosionParticle(projectile.x - width / 2, projectile.y - width / 2, width, enemy.color, {
+            x: (Math.random() - 0.5) * (Math.random() * 5),
+            y: (Math.random() - 0.5) * (Math.random() * 5)
+          }))
+        }
+        break;
+      }
+    }
+
+  }
+  //-------------------------------
+  //  ENEMY PROJECTILES
+  //-------------------------------
+  for (let i = enemyProjectiles.length - 1; i >= 0; i--) {
+    const projectile = enemyProjectiles[i];
+    projectile.update();
+    // collision
+    if (projectile.x < player.x + player.width && projectile.x + projectile.width > player.x &&
+      projectile.y < player.y + player.height && projectile.y + projectile.height > player.y) {
+      // console.log('we have been hit');
+      enemyProjectiles.splice(i, 1);
+      player.lives > 1 ? player.lives -= 1 : hasGameEnded = true;
+    }
+    if (projectile.y + projectile.height > bottomBorderHeight) {
+      enemyProjectiles.splice(i, 1);
+    }
+  }
+  //-------------------------------
+  //  EXPLOSIONS
+  //-------------------------------
+  explosionParticles.forEach((explosionParticle, index) => {
+    if (explosionParticle.alpha <= 0) {
+      explosionParticles.splice(index, 1)
+    } else {
+      explosionParticle.update()
+    }
   });
   //-------------------------------
   //  ENEMIES
