@@ -602,37 +602,14 @@ let enemies;
 
 let req;
 let frameNumber = 0;
-function animate() {
-  req = requestAnimationFrame(animate);
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  //----------------------------------------------------------------
-  if (hasGameEnded) {
-
-    let playerScoreText = `Player Score ${playerScore}`
-    let clickToStartText = `Click To Start ...`
-
-    ctx.fillStyle = "#01e8a2";
-    ctx.font = "italic small-caps bold 25px Arial Black";
-    let playerScoreTextWidth = ctx.measureText(playerScoreText).width;
-    let clickToStartTextWidth = ctx.measureText(clickToStartText).width;
-    let textHeight = ctx.measureText('M').width; // close approximation 
-    let textVerticalOffset = 20;
-    ctx.fillText(`${playerScoreText}`, (canvas.width / 2) - (playerScoreTextWidth / 2), ((canvas.height / 2) - (textHeight / 2)) + textVerticalOffset);
-    ctx.fillText(`${clickToStartText}`, (canvas.width / 2) - (clickToStartTextWidth / 2), ((canvas.height / 2) - (textHeight / 2)) - textVerticalOffset);
 
 
-    cancelAnimationFrame(req);
-    return;
-  }
+//-----------------------------------------------------------------
+//-------------------------------
+//  PLAYER PROJECTILES
+//-------------------------------
+function drawingPlayerProjectiles() {
 
-  //-------------------------------
-  //  PLAYER
-  //-------------------------------
-  player.update();
-
-  //-------------------------------
-  //  PLAYER PROJECTILES
-  //-------------------------------
   for (let i = projectiles.length - 1; i >= 0; i--) {
     const projectile = projectiles[i];
     //------------------------------
@@ -652,9 +629,8 @@ function animate() {
         enemies.splice(j, 1)
         enemiesLength = enemies.length
         if (enemiesLength === 0) hasGameEnded = true;
-        playerScore += enemy.constructor.name == 'Octopus' ? 10 : enemy.constructor.name == 'Enemy' ? 20 : 30;
+        playerScore += enemy.constructor.name == 'Octopus' ? 10 : enemy.constructor.name == 'Crab' ? 20 : 30;
 
-        //-------------------------------
         // create explosions
         for (let i = 0; i < 8; i++) {
           let width = (Math.random() * 2) + 3.5;
@@ -668,9 +644,13 @@ function animate() {
     }
 
   }
-  //-------------------------------
-  //  ENEMY PROJECTILES
-  //-------------------------------
+}
+
+//-------------------------------
+//  ENEMY PROJECTILES
+//-------------------------------
+
+function drawingEnemyProjectiles() {
   for (let i = enemyProjectiles.length - 1; i >= 0; i--) {
     const projectile = enemyProjectiles[i];
     projectile.update();
@@ -685,9 +665,13 @@ function animate() {
       enemyProjectiles.splice(i, 1);
     }
   }
-  //-------------------------------
-  //  EXPLOSIONS
-  //-------------------------------
+}
+
+//-------------------------------
+//  EXPLOSIONS
+//-------------------------------
+
+function drawingExplosionParticles() {
   explosionParticles.forEach((explosionParticle, index) => {
     if (explosionParticle.alpha <= 0) {
       explosionParticles.splice(index, 1)
@@ -695,10 +679,11 @@ function animate() {
       explosionParticle.update()
     }
   });
-  //-------------------------------
-  //  ENEMIES
-  //-------------------------------
-
+}
+//-------------------------------
+//  ENEMIES
+//-------------------------------
+function drawingEnemies() {
   const hasOneSecondPassed = frameNumber % 60 === 0 && frameNumber !== 0; // what I need
   for (let i = 0; i < enemies.length; i++) {
     enemies[i].update(hasOneSecondPassed);
@@ -718,29 +703,86 @@ function animate() {
       break;
     }
   }
-
-  //---------------------------------------------------
-  // BOTTOM BORDER
-  //---------------------------------------------------
-
+}
+//---------------------------------------------------
+// BOTTOM BORDER
+//---------------------------------------------------
+function drawingBottomBorder() {
   ctx.strokeStyle = borderColor;
   ctx.beginPath();
   ctx.moveTo(0, bottomBorderHeight);
   ctx.lineTo(canvas.width, bottomBorderHeight);
   ctx.lineWidth = 2;
   ctx.stroke();
-  //---------------------------------------------------
-
-  //---------------------------------------------------
-  // PLAYER LIVES TEXT
-  //---------------------------------------------------
+}
+//---------------------------------------------------
+// PLAYER LIVES TEXT
+//---------------------------------------------------
+function drawingPlayerScoreAndLivesLeftText() {
   ctx.fillStyle = "#01e8a2";
   ctx.font = "italic small-caps bold 15px Arial Black";
   ctx.fillText(`Player score: ${playerScore}`, 15, canvas.height - 8);
   ctx.fillText(`Player lives: ${player.lives}`, 360, canvas.height - 8);
+}
+//---------------------------------------------------
+// END GAME TEXT
+//---------------------------------------------------
+function drawingEndGameText() {
+  let playerScoreText = `Player Score ${playerScore}`
+  let clickToStartText = `Click To Start ...`
 
+  ctx.fillStyle = "#01e8a2";
+  ctx.font = "italic small-caps bold 25px Arial Black";
+  let playerScoreTextWidth = ctx.measureText(playerScoreText).width;
+  let clickToStartTextWidth = ctx.measureText(clickToStartText).width;
+  let textHeight = ctx.measureText('M').width; // close approximation 
+  let textVerticalOffset = 20;
+  ctx.fillText(`${playerScoreText}`, (canvas.width / 2) - (playerScoreTextWidth / 2), ((canvas.height / 2) - (textHeight / 2)) + textVerticalOffset);
+  ctx.fillText(`${clickToStartText}`, (canvas.width / 2) - (clickToStartTextWidth / 2), ((canvas.height / 2) - (textHeight / 2)) - textVerticalOffset);
+
+}
+//------------------------------------------------------------------
+//------------------------------------------------------------------
+function animate() {
+  req = requestAnimationFrame(animate);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //----------------------------------------------------------------
+  if (hasGameEnded) {
+    drawingEndGameText();
+    cancelAnimationFrame(req);
+    return;
+  }
+  //-------------------------------
+  //  PLAYER
+  //-------------------------------
+  player.update();
+
+  //-------------------------------
+  //  PLAYER PROJECTILES
+  //-------------------------------
+  drawingPlayerProjectiles();
+  //-------------------------------
+  //  ENEMY PROJECTILES
+  //-------------------------------
+  drawingEnemyProjectiles();
+  //-------------------------------
+  //  EXPLOSIONS
+  //-------------------------------
+  drawingExplosionParticles();
+  //-------------------------------
+  //  ENEMIES
+  //-------------------------------
+  drawingEnemies();
   //---------------------------------------------------
-  frameNumber++
+  // BOTTOM BORDER
+  //---------------------------------------------------
+  drawingBottomBorder();
+  //---------------------------------------------------
+  // PLAYER LIVES TEXT
+  //---------------------------------------------------
+  drawingPlayerScoreAndLivesLeftText();
+  //---------------------------------------------------
+  frameNumber++;
 
 }
 
