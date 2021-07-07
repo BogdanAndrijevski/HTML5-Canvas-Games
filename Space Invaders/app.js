@@ -4,6 +4,7 @@ canvas.height = 550;
 let ctx = canvas.getContext('2d');
 
 // Center Canvas with JavaScript
+const borderColor = 'green';
 canvas.style.display = "block";
 canvas.style.position = "absolute";
 canvas.style.margin = "auto";
@@ -11,7 +12,8 @@ canvas.style.top = 0;
 canvas.style.bottom = 0;
 canvas.style.left = 0;
 canvas.style.right = 0;
-canvas.style.border = "2px solid red";
+canvas.style.border = `2px solid ${borderColor}`;
+// canvas.style.border = "2px solid red";
 
 let bottomBorderPadding = 25;
 let bottomBorderHeight = canvas.height - bottomBorderPadding;
@@ -19,6 +21,7 @@ let enemiesLength;
 
 let player;
 let playerScore = 0;
+let hasGameEnded = false;
 
 let plane = {
   height: 50,
@@ -297,10 +300,10 @@ class Enemy {
     }
   }
 
-  update(haveTwoSecondsPassed) {
-    this.danceAndMove(haveTwoSecondsPassed)
-    this.draw(haveTwoSecondsPassed)
-    this.shootProjectile()
+  update(hasOneSecondPassed) {
+    this.danceAndMove(hasOneSecondPassed);
+    this.draw();
+    this.shootProjectile();
   }
 }
 
@@ -388,9 +391,6 @@ class Octopus extends Enemy {
 
 
 }
-
-
-
 
 class Squid extends Enemy {
   constructor(...args) {
@@ -605,6 +605,25 @@ let frameNumber = 0;
 function animate() {
   req = requestAnimationFrame(animate);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //----------------------------------------------------------------
+  if (hasGameEnded) {
+
+    let playerScoreText = `Player Score ${playerScore}`
+    let clickToStartText = `Click To Start ...`
+
+    ctx.fillStyle = "#01e8a2";
+    ctx.font = "italic small-caps bold 25px Arial Black";
+    let playerScoreTextWidth = ctx.measureText(playerScoreText).width;
+    let clickToStartTextWidth = ctx.measureText(clickToStartText).width;
+    let textHeight = ctx.measureText('M').width; // close approximation 
+    let textVerticalOffset = 20;
+    ctx.fillText(`${playerScoreText}`, (canvas.width / 2) - (playerScoreTextWidth / 2), ((canvas.height / 2) - (textHeight / 2)) + textVerticalOffset);
+    ctx.fillText(`${clickToStartText}`, (canvas.width / 2) - (clickToStartTextWidth / 2), ((canvas.height / 2) - (textHeight / 2)) - textVerticalOffset);
+
+
+    cancelAnimationFrame(req);
+    return;
+  }
 
   //-------------------------------
   //  PLAYER
@@ -699,7 +718,43 @@ function animate() {
       break;
     }
   }
+
+  //---------------------------------------------------
+  // BOTTOM BORDER
+  //---------------------------------------------------
+
+  ctx.strokeStyle = borderColor;
+  ctx.beginPath();
+  ctx.moveTo(0, bottomBorderHeight);
+  ctx.lineTo(canvas.width, bottomBorderHeight);
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  //---------------------------------------------------
+
+  //---------------------------------------------------
+  // PLAYER LIVES TEXT
+  //---------------------------------------------------
+  ctx.fillStyle = "#01e8a2";
+  ctx.font = "italic small-caps bold 15px Arial Black";
+  ctx.fillText(`Player score: ${playerScore}`, 15, canvas.height - 8);
+  ctx.fillText(`Player lives: ${player.lives}`, 360, canvas.height - 8);
+
+  //---------------------------------------------------
+  frameNumber++
+
 }
 
 init();
 animate();
+
+// restart the game
+document.addEventListener('click', () => {
+  if (hasGameEnded) {
+    // all 3 line below can be in init()
+    hasGameEnded = false;
+    playerScore = 0;
+    readyToFire = false;
+    init()
+    requestAnimationFrame(animate);
+  }
+});
