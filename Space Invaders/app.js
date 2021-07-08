@@ -13,7 +13,6 @@ canvas.style.bottom = 0;
 canvas.style.left = 0;
 canvas.style.right = 0;
 canvas.style.border = `2px solid ${borderColor}`;
-// canvas.style.border = "2px solid red";
 
 let bottomBorderPadding = 25;
 let bottomBorderHeight = canvas.height - bottomBorderPadding;
@@ -21,24 +20,35 @@ let enemiesLength;
 
 let player;
 let playerScore = 0;
+let playerLives = 9;
+
 let hasGameEnded = false;
 
-let plane = {
-  height: 50,
-  width: 50,
-  speed: 5
-}
+let plane = {};
+plane.height = 50;
+plane.width = 50;
+plane.speed = 5;
 
-//===========================================
+let enemy = {};
+enemy.columns = 8;
+enemy.rows = 6;
+enemy.gap = 15;
+enemy.gapTop = 30
+enemy.sideGap = 30;
+enemy.additionalVerticalGap = 6;
+enemy.width = ((canvas.width - enemy.sideGap) - enemy.gap) / enemy.columns;
+enemy.height = enemy.width * 0.5; 
+
+let enemies;
+let projectiles;
+let enemyProjectiles;
+let explosionParticles;
+
 //  keyboard movement
 let left = false;
 let right = false;
 let readyToFire = false
 let weaponsLocked = false;
-
-let projectiles;
-let explosionParticles;
-let enemyProjectiles;
 
 
 function keysPressed(e) {
@@ -81,7 +91,7 @@ class Player {
     this.width = width;
     this.height = height;
     this.color = color || "red"
-    this.lives = 9;
+    this.lives = playerLives;
 
     this.grid = [
       { x: 7, y: 0 },
@@ -147,7 +157,6 @@ class Player {
     let x_pixel = this.width / 9
     let y_pixel = this.height / 9
 
-
     ctx.beginPath();
     ctx.moveTo(this.x + x_pixel * 2, this.y + y_pixel * 0);
     for (const e of this.grid) {
@@ -156,9 +165,7 @@ class Player {
     ctx.closePath();
 
     ctx.fillStyle = "#ff1353"; // redish
-    ctx.fill()
-
-    //----------------------------------
+    ctx.fill();
 
     ctx.fillStyle = '#0396ff'; // blue
     this.blueParts.forEach(e => {
@@ -169,7 +176,7 @@ class Player {
     this.yellowParts.forEach(e => {
       ctx.fillRect(this.x + x_pixel * e.x, this.y + y_pixel * e.y, x_pixel * e.width, y_pixel * e.height)
     });
-    //----------------------------------
+    
   }
   update() {
     if (readyToFire == true) {
@@ -184,12 +191,10 @@ class Player {
     if (right == true && this.x + this.width < canvas.width) {
       this.x += plane.speed;
     }
-
     this.draw()
   }
 }
 
-// Projectile 
 
 class Projectile {
   constructor(x, y, width, height, velocity_y, color) {
@@ -313,7 +318,6 @@ class Octopus extends Enemy {
     super(...args)
 
     this.grid = [
-
       { x: 6, y: 0 },
       { x: 6, y: 1 },
       { x: 8, y: 1 },
@@ -349,14 +353,11 @@ class Octopus extends Enemy {
       { x: 1, y: 2 },
       { x: 1, y: 1 },
       { x: 3, y: 1 },
-
-
     ]
 
     this.eyesGrid = [
       { x: 2.5, y: 2, width: 1, height: 1 },
       { x: 5.5, y: 2, width: 1, height: 1 },
-
     ]
   }
 
@@ -366,7 +367,6 @@ class Octopus extends Enemy {
 
     let x_pixel = this.width / 9;
     let y_pixel = this.height / 8;
-
 
     ctx.beginPath();
     ctx.moveTo(this.x + x_pixel * 3, this.y + y_pixel * 0);
@@ -384,12 +384,7 @@ class Octopus extends Enemy {
     this.eyesGrid.forEach(e => {
       ctx.fillRect(this.x + x_pixel * e.x, this.y + y_pixel * e.y, x_pixel * e.width, y_pixel * e.height)
     });
-
-
-
   }
-
-
 }
 
 class Squid extends Enemy {
@@ -397,7 +392,6 @@ class Squid extends Enemy {
     super(...args)
 
     this.grid = [
-
       { x: 5, y: 0 },
       { x: 5, y: 1 },
       { x: 6, y: 1 },
@@ -406,19 +400,14 @@ class Squid extends Enemy {
       { x: 7, y: 3 },
       { x: 8, y: 3 },
       { x: 8, y: 5 },
-
-
       { x: 7, y: 5, x2: 6, y2: 5 },
       { x: 7, y: 6, x2: 6, y2: 6 },
       { x: 8, y: 6, x2: 7, y2: 6 },
       { x: 8, y: 7, x2: 7, y2: 7 },
       { x: 7, y: 7, x2: 8, y2: 7 },
-
-
       { x: 7, y: 8, x2: 8, y2: 8 },
       { x: 6, y: 8, x2: 7, y2: 8 },
       { x: 6, y: 7, x2: 7, y2: 7 },
-
       { x: 7, y: 7, x2: 6, y2: 7 },
       { x: 7, y: 6, x2: 6, y2: 6 },
       { x: 6, y: 6, x2: 5, y2: 6 },
@@ -427,7 +416,6 @@ class Squid extends Enemy {
       { x: 5, y: 6, x2: 5, y2: 5 },
       { x: 3, y: 6, x2: 3, y2: 5 },
       { x: 3, y: 5 },
-
       { x: 2, y: 5, x2: 3, y2: 5 },
       { x: 2, y: 6, x2: 3, y2: 6 },
       { x: 1, y: 6, x2: 2, y2: 6 },
@@ -436,7 +424,6 @@ class Squid extends Enemy {
       { x: 2, y: 8, x2: 1, y2: 8 },
       { x: 1, y: 8, x2: 0, y2: 8 },
       { x: 1, y: 7, x2: 0, y2: 7 },
-
       { x: 0, y: 7, x2: 1, y2: 7 },
       { x: 0, y: 6, x2: 1, y2: 6 },
       { x: 1, y: 6, x2: 2, y2: 6 },
@@ -448,13 +435,11 @@ class Squid extends Enemy {
       { x: 2, y: 2 },
       { x: 2, y: 1 },
       { x: 3, y: 1 },
-
     ]
 
     this.eyesGrid = [
       { x: 2, y: 3, width: 1, height: 1 },
       { x: 5, y: 3, width: 1, height: 1 },
-
     ]
 
     this.legs = [
@@ -465,12 +450,10 @@ class Squid extends Enemy {
     ]
   }
 
-
   draw() {
 
     let x_pixel = this.width / 8;
     let y_pixel = this.height / 8;
-
 
     ctx.beginPath();
     ctx.moveTo(this.x + x_pixel * 3, this.y + y_pixel * 0);
@@ -493,21 +476,14 @@ class Squid extends Enemy {
     this.eyesGrid.forEach(e => {
       ctx.fillRect(this.x + x_pixel * e.x, this.y + y_pixel * e.y, x_pixel * e.width, y_pixel * e.height)
     });
-
-
-
   }
-
-
 }
-
 
 class Crab extends Enemy {
   constructor(...args) {
     super(...args)
 
     this.grid = [
-
       { x: 3, y: 0 },
       { x: 3, y: 1 },
       { x: 4, y: 1 },
@@ -558,13 +534,10 @@ class Crab extends Enemy {
     ]
   }
 
-
-
   draw() {
 
     let x_pixel = this.width / 11
     let y_pixel = this.height / 8
-
 
     ctx.beginPath();
     ctx.moveTo(this.x + x_pixel * 2, this.y + y_pixel * 0);
@@ -582,39 +555,12 @@ class Crab extends Enemy {
     // right eye
     ctx.fillRect(this.x + x_pixel * 7, this.y + y_pixel * 3, x_pixel, y_pixel)
   }
-
-
 }
 
-let enemy = {}
-enemy.columns = 8
-enemy.rows = 6;
-enemy.gap = 15;
-enemy.gapTop = 30
-enemy.sideGap = 30;
-enemy.additionalVerticalGap = 6;
-
-
-enemy.width = ((canvas.width - enemy.sideGap) - enemy.gap) / enemy.columns;
-enemy.height = enemy.width * 0.5// * 0.8 // * 0.55646 cube
-
-let enemies;
-
-let req;
-let frameNumber = 0;
-
-
-//-----------------------------------------------------------------
-//-------------------------------
-//  PLAYER PROJECTILES
-//-------------------------------
 function drawingPlayerProjectiles() {
-
   for (let i = projectiles.length - 1; i >= 0; i--) {
     const projectile = projectiles[i];
-    //------------------------------
     projectile.update();
-    //------------------------------
     if (projectile.y + projectile.height < 0) {
       projectiles.splice(i, 1);
       continue;
@@ -646,10 +592,6 @@ function drawingPlayerProjectiles() {
   }
 }
 
-//-------------------------------
-//  ENEMY PROJECTILES
-//-------------------------------
-
 function drawingEnemyProjectiles() {
   for (let i = enemyProjectiles.length - 1; i >= 0; i--) {
     const projectile = enemyProjectiles[i];
@@ -657,7 +599,6 @@ function drawingEnemyProjectiles() {
     // collision
     if (projectile.x < player.x + player.width && projectile.x + projectile.width > player.x &&
       projectile.y < player.y + player.height && projectile.y + projectile.height > player.y) {
-      // console.log('we have been hit');
       enemyProjectiles.splice(i, 1);
       player.lives > 1 ? player.lives -= 1 : hasGameEnded = true;
     }
@@ -666,10 +607,6 @@ function drawingEnemyProjectiles() {
     }
   }
 }
-
-//-------------------------------
-//  EXPLOSIONS
-//-------------------------------
 
 function drawingExplosionParticles() {
   explosionParticles.forEach((explosionParticle, index) => {
@@ -680,11 +617,8 @@ function drawingExplosionParticles() {
     }
   });
 }
-//-------------------------------
-//  ENEMIES
-//-------------------------------
-function drawingEnemies() {
-  const hasOneSecondPassed = frameNumber % 60 === 0 && frameNumber !== 0; // what I need
+
+function drawingEnemies(hasOneSecondPassed) {
   for (let i = 0; i < enemies.length; i++) {
     enemies[i].update(hasOneSecondPassed);
     if (enemies[i].x + enemies[i].width + enemies[i].velocity.x > canvas.width || enemies[i].x + enemies[i].velocity.x < 0) {
@@ -704,9 +638,7 @@ function drawingEnemies() {
     }
   }
 }
-//---------------------------------------------------
-// BOTTOM BORDER
-//---------------------------------------------------
+
 function drawingBottomBorder() {
   ctx.strokeStyle = borderColor;
   ctx.beginPath();
@@ -715,18 +647,14 @@ function drawingBottomBorder() {
   ctx.lineWidth = 2;
   ctx.stroke();
 }
-//---------------------------------------------------
-// PLAYER LIVES TEXT
-//---------------------------------------------------
+
 function drawingPlayerScoreAndLivesLeftText() {
   ctx.fillStyle = "#01e8a2";
   ctx.font = "italic small-caps bold 15px Arial Black";
   ctx.fillText(`Player score: ${playerScore}`, 15, canvas.height - 8);
   ctx.fillText(`Player lives: ${player.lives}`, 360, canvas.height - 8);
 }
-//---------------------------------------------------
-// END GAME TEXT
-//---------------------------------------------------
+
 function drawingEndGameText() {
   let playerScoreText = `Player Score ${playerScore}`
   let clickToStartText = `Click To Start ...`
@@ -741,49 +669,29 @@ function drawingEndGameText() {
   ctx.fillText(`${clickToStartText}`, (canvas.width / 2) - (clickToStartTextWidth / 2), ((canvas.height / 2) - (textHeight / 2)) - textVerticalOffset);
 
 }
-//------------------------------------------------------------------
-//------------------------------------------------------------------
+
+let req;
+let frameCounter = 0;
+
 function animate() {
   req = requestAnimationFrame(animate);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  //----------------------------------------------------------------
+  const hasOneSecondPassed = frameCounter % 60 === 0 && frameCounter !== 0; 
+ 
   if (hasGameEnded) {
     drawingEndGameText();
     cancelAnimationFrame(req);
     return;
   }
-  //-------------------------------
-  //  PLAYER
-  //-------------------------------
+ 
   player.update();
-
-  //-------------------------------
-  //  PLAYER PROJECTILES
-  //-------------------------------
   drawingPlayerProjectiles();
-  //-------------------------------
-  //  ENEMY PROJECTILES
-  //-------------------------------
   drawingEnemyProjectiles();
-  //-------------------------------
-  //  EXPLOSIONS
-  //-------------------------------
   drawingExplosionParticles();
-  //-------------------------------
-  //  ENEMIES
-  //-------------------------------
-  drawingEnemies();
-  //---------------------------------------------------
-  // BOTTOM BORDER
-  //---------------------------------------------------
+  drawingEnemies(hasOneSecondPassed);
   drawingBottomBorder();
-  //---------------------------------------------------
-  // PLAYER LIVES TEXT
-  //---------------------------------------------------
   drawingPlayerScoreAndLivesLeftText();
-  //---------------------------------------------------
-  frameNumber++;
-
+  frameCounter++;
 }
 
 init();
