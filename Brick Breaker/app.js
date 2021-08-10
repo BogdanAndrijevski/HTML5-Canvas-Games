@@ -5,7 +5,6 @@ canvas.style.backgroundColor = 'rgb(11, 11, 11)';
 canvas.width = 700
 canvas.height = 500
 
-//------------------------------------------------
 // Center Canvas with JavaScriptws
 canvas.style.display = "block";
 canvas.style.position = "absolute";
@@ -15,8 +14,6 @@ canvas.style.bottom = 0;
 canvas.style.left = 0;
 canvas.style.right = 0;
 
-// canvas.style.border = "2px solid red"
-//------------------------------------------------
 
 // Implementation
 let player;
@@ -64,8 +61,6 @@ class Square {
 
 
   ballInteraction(ball) {
-    // if (this.brick || this.isBouncingAllowed === true) {
-    //   if (this.brick && ball.isTouchingAllowed !== true) { return }
     if (this.brick && ball.isTouchingAllowed === true ||
       this.isBouncingAllowed === true) {
       // CORNERS
@@ -351,9 +346,6 @@ brick.columns = 10
 brick.rows = 9;
 brick.gap = 3;
 brick.gapTopWall = 50
-
-
-// brick.width = 100
 brick.height = 20
 
 function init() {
@@ -373,29 +365,31 @@ function init() {
       bricks.push(new Brick(lives, x, y, width, height));
     }
   }
-
-  //===================
-  // for (let j = 0; j < brick.rows; j++) {
-  //   for (let i = 0; i < brick.columns; i++) {
-  //     brick.width = (canvas.width - brick.gap) / brick.columns // we can put this outside where the other variables are
-  //     bricks.push(new Brick(3, brick.width * i + brick.gap, (brick.height * j) + brick.gapTopWall, brick.width - brick.gap, brick.height - brick.gap));
-  //   }
-  // }
 }
 
 
 // Animation Loop
 let req;
+let frameCounter = 0;
+let secondsPassed = 0;
 function animate() {
   // debugger
   req = requestAnimationFrame(animate)
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  //----------------------------------------------------------------
+
   if (hasGameEnded) {
-    ctx.fillStyle = "orange";
-    // ctx.font = "30px arial";
+    //----------------------------------------------------------------
+    let playerScoreText = bricks.length > 0 ? `You lost` : `You won in ${secondsPassed} seconds`;
+    let clickToStartText = `Click To Start ...`
+    ctx.fillStyle = "salmon";
     ctx.font = "italic small-caps bold 25px Arial Black";
-    ctx.fillText("Click To Start ...", 240, 240);
+    let playerScoreTextWidth = ctx.measureText(playerScoreText).width;
+    let clickToStartTextWidth = ctx.measureText(clickToStartText).width;
+    let textHeight = ctx.measureText('M').width; // close approximation 
+    let textVerticalOffset = 20;
+    ctx.fillText(`${playerScoreText}`, (canvas.width / 2) - (playerScoreTextWidth / 2), ((canvas.height / 2) - (textHeight / 2)) - textVerticalOffset);
+    ctx.fillText(`${clickToStartText}`, (canvas.width / 2) - (clickToStartTextWidth / 2), ((canvas.height / 2) - (textHeight / 2)) + textVerticalOffset);
+   
     cancelAnimationFrame(req);
     return;
   }
@@ -425,6 +419,17 @@ function animate() {
   //   }
   // });
   // ---------------------------
+
+
+  if (frameCounter % 60 == 0 && frameCounter !== 0) {
+    secondsPassed += 1;
+  }
+  ctx.fillStyle = "salmon";
+  ctx.font = "italic small-caps bold 25px Arial Black";
+  ctx.fillText(`${secondsPassed}`, 10, 30);
+
+  // ---------------------------
+  frameCounter++
 }
 
 init();
@@ -442,6 +447,7 @@ document.addEventListener('click', () => {
   if (hasGameEnded) {
     hasGameEnded = false;
     bricks = [];
+    secondsPassed = 0;
     init()
     requestAnimationFrame(animate);
   }
